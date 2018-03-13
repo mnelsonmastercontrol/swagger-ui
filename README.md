@@ -1,5 +1,7 @@
 # Swagger UI
 
+For information on how to update Swagger UI for MasterControl, go to http://mcustsec/wiki/doku.php?id=how_to_update_our_modified_swagger_ui
+
 [![NPM version](https://badge.fury.io/js/swagger-ui.svg)](http://badge.fury.io/js/swagger-ui)
 
 ## New!
