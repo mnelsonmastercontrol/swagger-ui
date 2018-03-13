@@ -68,26 +68,28 @@
 <div id="swagger-ui"></div>
 
 <script src="./swagger-ui-bundle.js"> </script>
-<script src="./sanitizeForMc.js"> </script>
 <script src="./swagger-ui-standalone-preset.js"> </script>
 <script>
-  window.onload = function() {
-    const ui = SwaggerUIBundle({
-      url: localStorage.getItem("contextPaths.javaContextPath.REVERSEPROXY") + '/v2/api-docs',
-      dom_id: '#swagger-ui',
-      deepLinking: true,
-      presets: [
-        SwaggerUIBundle.presets.apis,
-        SwaggerUIStandalonePreset
-      ],
-      plugins: [
-        SwaggerUIBundle.plugins.DownloadUrl
-      ],
-      layout: "StandaloneLayout"
-    })
+window.onload = function() {
+  
+  // Build a system
+  const ui = SwaggerUIBundle({
+    url: "http://petstore.swagger.io/v2/swagger.json",
+    dom_id: '#swagger-ui',
+    validatorUrl: null,
+    deepLinking: true,
+    presets: [
+      SwaggerUIBundle.presets.apis,
+      SwaggerUIStandalonePreset
+    ],
+    plugins: [
+      SwaggerUIBundle.plugins.DownloadUrl
+    ],
+    layout: "StandaloneLayout"
+  })
 
-    window.ui = ui
-  }
+  window.ui = ui
+}
 </script>
 </body>
 
