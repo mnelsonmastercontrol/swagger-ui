@@ -72,33 +72,21 @@
 <script src="./swagger-ui-standalone-preset.js"> </script>
 <script>
   window.onload = function() {
-    function getAPIJson(url, success) {
-      var xhr = new XMLHttpRequest();
-      if (!('withCredentials' in xhr)) xhr = new XDomainRequest(); // fix IE8/9
-      xhr.open('GET', url);
-      xhr.onload = success;
-      xhr.send();
-      return xhr;
-    }
-    getAPIJson(localStorage.getItem("contextPaths.javaContextPath.REVERSEPROXY") + '/v2/api-docs', function(request){
-        var spec = request.currentTarget.response || request.target.responseText;
+    const ui = SwaggerUIBundle({
+      url: localStorage.getItem("contextPaths.javaContextPath.REVERSEPROXY") + '/v2/api-docs',
+      dom_id: '#swagger-ui',
+      deepLinking: true,
+      presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIStandalonePreset
+      ],
+      plugins: [
+        SwaggerUIBundle.plugins.DownloadUrl
+      ],
+      layout: "StandaloneLayout"
+    })
 
-        const ui = SwaggerUIBundle({
-          url: "",
-          dom_id: "#swagger-ui",
-          validatorUrl: null,
-          spec: JSON.parse(spec),
-          presets: [
-            SwaggerUIBundle.presets.apis,
-            SwaggerUIStandalonePreset
-          ],
-          plugins: [
-            SwaggerUIBundle.plugins.DownloadUrl
-          ]
-        })
-
-        window.ui = ui
-    });
+    window.ui = ui
   }
 </script>
 </body>
