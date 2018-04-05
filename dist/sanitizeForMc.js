@@ -18,32 +18,43 @@
         }
     };
 
-
-	function sanitizeUneededUi() {
-	  sanitizeContentTypes();
-	  sanitizeTryOut();
-	  
+	function sanitizeUnneededUI() {
+        var classSanitizers = {
+            "try-out": remove,
+            "base-url": remove,
+            "content-type": contentTypeSanitizer
+        };
+        forEachMemberInObject(classSanitizers, sanitizeByClassName);
 	}
 
-	function sanitizeContentTypes() {
-	  var contentTypes = document.getElementsByClassName("content-type");
-	  for(var i=0; i<contentTypes.length; i++){
-	    var contentType = contentTypes[i];
-	    var currentValue = contentType.value;
+	function forEachMemberInObject(obj, action){
+	    for (var member in obj){
+	        action(member, obj[member]);
+        }
+    }
+
+    function sanitizeByClassName(className, sanitizer) {
+        var elements = document.getElementsByClassName(className);
+        for(var i=0; i<elements.length; i++){
+            sanitizer(elements[i]);
+        }
+    }
+
+    function contentTypeSanitizer(element){
+        dropdownToParagraph(element);
+        remove(element);
+    }
+
+    function dropdownToParagraph(dropdown){
+        var currentValue = dropdown.value;
 	    var newNode = document.createElement("p");
 	    newNode.innerText = currentValue;
-	    contentType.parentNode.appendChild(newNode);
-	    contentType.parentNode.removeChild(contentType);
-	  }
+	    dropdown.parentNode.appendChild(newNode);
+    }
+
+    function remove(element){
+        element.parentNode.removeChild(element);
 	}
 
-	function sanitizeTryOut() {
-	  var tryOutButtons = document.getElementsByClassName("try-out");
-	  for(var i=0; i<tryOutButtons.length; i++){
-	    tryOutButtons[i].parentNode.removeChild(tryOutButtons[i]);
-	  }
-	}
-
-
-	observeDOM(document, sanitizeUneededUi);
+	observeDOM(document, sanitizeUnneededUI);
 })();
