@@ -73,7 +73,7 @@
 <script>
   window.onload = function() {
     getBaseUrl = function () {
-      var pathsInUrl = window.location.pathname.split('/');
+      var pathsInUrl = location.pathname.split('/');
       var currentShare = pathsInUrl[0] || pathsInUrl[1];
       return location.protocol + "//" + location.host + "/" + currentShare;
     };
