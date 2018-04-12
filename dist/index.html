@@ -72,8 +72,14 @@
 <script src="./sanitizeForMc.js"></script>
 <script>
   window.onload = function() {
+    getBaseUrl = function () {
+      var pathsInUrl = window.location.pathname.split('/');
+      var currentShare = pathsInUrl[0] || pathsInUrl[1];
+      return `${location.protocol}//${location.host}/${currentShare}`;
+    };
+
     const ui = SwaggerUIBundle({
-      url: localStorage.getItem("contextPaths.javaContextPath.REVERSEPROXY") + '/v2/api-docs',
+      url: `${getBaseUrl()}/restapi/v2/api-docs`,
       dom_id: '#swagger-ui',
       deepLinking: true,
       validatorUrl: null,
