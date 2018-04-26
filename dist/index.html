@@ -70,16 +70,30 @@
 <script src="./swagger-ui-bundle.js"> </script>
 <script src="./swagger-ui-standalone-preset.js"> </script>
 <script src="./sanitizeForMc.js"></script>
+<script src="./swagger-json.js"></script>
+<script src="./jszip.min.js"></script><!-- https://github.com/Stuk/jszip -->
+<script src="./export-documentation.js"></script>
 <script>
   window.onload = function() {
-    getBaseUrl = function () {
-      var pathsInUrl = location.pathname.split('/');
-      var currentShare = pathsInUrl[0] || pathsInUrl[1];
-      return location.protocol + "//" + location.host + "/" + currentShare;
-    };
+    loadSwaggerUi();
+  }
 
-    const ui = SwaggerUIBundle({
-      url: getBaseUrl() + "/restapi/v2/api-docs",
+  getBaseUrl = function () {
+    var pathsInUrl = location.pathname.split('/');
+    var currentShare = pathsInUrl[0] || pathsInUrl[1];
+    return location.protocol + "//" + location.host + "/" + currentShare;
+  };
+
+  getUrlToJsonDocumentation = function() {
+    return getBaseUrl() + "/restapi/v2/api-docs";
+  }
+
+  isHostedLocally = function() {
+    return getBaseUrl().includes("file://")
+  };
+
+  getSwaggerUiBundleSettings = function() {
+    return {
       dom_id: '#swagger-ui',
       deepLinking: true,
       validatorUrl: null,
@@ -91,8 +105,19 @@
         SwaggerUIBundle.plugins.DownloadUrl
       ],
       layout: "StandaloneLayout"
-    })
-  }
+    };
+  };
+
+  loadSwaggerUi = function() {
+    let config = getSwaggerUiBundleSettings();
+    if(isHostedLocally) {
+      config.spec = swaggerJson;
+    } else {
+      config.url = getUrlToJsonDocumentation();
+    }
+    SwaggerUIBundle(config);
+  };
+
 </script>
 </body>
 
