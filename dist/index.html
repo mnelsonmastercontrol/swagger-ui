@@ -69,17 +69,13 @@
 
 <script src="./swagger-ui-bundle.js"> </script>
 <script src="./swagger-ui-standalone-preset.js"> </script>
+<script src="./mc-swagger.js"></script>
 <script src="./sanitizeForMc.js"></script>
 <script>
   window.onload = function() {
-    getBaseUrl = function () {
-      var pathsInUrl = location.pathname.split('/');
-      var currentShare = pathsInUrl[0] || pathsInUrl[1];
-      return location.protocol + "//" + location.host + "/" + currentShare;
-    };
 
     const ui = SwaggerUIBundle({
-      url: getBaseUrl() + "/restapi/v2/api-docs",
+      url: getRequestedVersionPath(),
       dom_id: '#swagger-ui',
       deepLinking: true,
       validatorUrl: null,
