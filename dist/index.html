@@ -71,12 +71,24 @@
 <script src="./swagger-ui-standalone-preset.js"> </script>
 <script src="./sanitizeForMc.js"></script>
 <script src="./swagger-json.js"></script>
-<script src="./jszip.min.js"></script><!-- https://github.com/Stuk/jszip -->
-<script src="./export-documentation.js"></script>
+
+<link rel="stylesheet" type="text/css" href="styleForMc.css" >
+
 <script>
   window.onload = function() {
     loadSwaggerUi();
   }
+
+  loadSwaggerUi = function() {
+    let config = getSwaggerUiBundleSettings();
+    if(isHostedLocally()) {
+      //defined in swagger-json.js
+      config.spec = swaggerJson;
+    } else {
+      config.url = getUrlToJsonDocumentation();
+    }
+    SwaggerUIBundle(config);
+  };
 
   getBaseUrl = function () {
     var pathsInUrl = location.pathname.split('/');
@@ -108,17 +120,9 @@
     };
   };
 
-  loadSwaggerUi = function() {
-    let config = getSwaggerUiBundleSettings();
-    if(isHostedLocally) {
-      config.spec = swaggerJson;
-    } else {
-      config.url = getUrlToJsonDocumentation();
-    }
-    SwaggerUIBundle(config);
-  };
 
 </script>
+
 </body>
 
 </html>

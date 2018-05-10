@@ -1,4 +1,6 @@
-.try-out {
+.try-out,
+.topbar,
+.info .url {
   display: none;
 }
 
