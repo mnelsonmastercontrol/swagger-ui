@@ -89,21 +89,7 @@
     }
     SwaggerUIBundle(config);
   };
-
-  getBaseUrl = function () {
-    var pathsInUrl = location.pathname.split('/');
-    var currentShare = pathsInUrl[0] || pathsInUrl[1];
-    return location.protocol + "//" + location.host + "/" + currentShare;
-  };
-
-  getUrlToJsonDocumentation = function() {
-    return getBaseUrl() + "/restapi/v2/api-docs";
-  }
-
-  isHostedLocally = function() {
-    return getBaseUrl().includes("file://")
-  };
-
+  
   getSwaggerUiBundleSettings = function() {
     return {
       dom_id: '#swagger-ui',
@@ -120,9 +106,19 @@
     };
   };
 
+  getBaseUrl = function () {
+    var pathsInUrl = location.pathname.split('/');
+    var currentShare = pathsInUrl[0] || pathsInUrl[1];
+    return location.protocol + "//" + location.host + "/" + currentShare;
+  };
 
+  getUrlToJsonDocumentation = function() {
+    return getBaseUrl() + "/restapi/v2/api-docs";
+  }
+
+  isHostedLocally = function() {
+    return getBaseUrl().includes("file://")
+  };
 </script>
 
-</body>
-
-</html>
+</body></html>
