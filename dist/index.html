@@ -70,16 +70,28 @@
 <script src="./swagger-ui-bundle.js"> </script>
 <script src="./swagger-ui-standalone-preset.js"> </script>
 <script src="./sanitizeForMc.js"></script>
+<script src="./swagger-json.js"></script>
+
+<link rel="stylesheet" type="text/css" href="styleForMc.css" >
+
 <script>
   window.onload = function() {
-    getBaseUrl = function () {
-      var pathsInUrl = location.pathname.split('/');
-      var currentShare = pathsInUrl[0] || pathsInUrl[1];
-      return location.protocol + "//" + location.host + "/" + currentShare;
-    };
+    loadSwaggerUi();
+  }
 
-    const ui = SwaggerUIBundle({
-      url: getBaseUrl() + "/restapi/v2/api-docs",
+  loadSwaggerUi = function() {
+    let config = getSwaggerUiBundleSettings();
+    if(isHostedLocally()) {
+      //defined in swagger-json.js
+      config.spec = swaggerJson;
+    } else {
+      config.url = getUrlToJsonDocumentation();
+    }
+    SwaggerUIBundle(config);
+  };
+  
+  getSwaggerUiBundleSettings = function() {
+    return {
       dom_id: '#swagger-ui',
       deepLinking: true,
       validatorUrl: null,
@@ -91,9 +103,22 @@
         SwaggerUIBundle.plugins.DownloadUrl
       ],
       layout: "StandaloneLayout"
-    })
-  }
-</script>
-</body>
+    };
+  };
 
-</html>
+  getBaseUrl = function () {
+    var pathsInUrl = location.pathname.split('/');
+    var currentShare = pathsInUrl[0] || pathsInUrl[1];
+    return location.protocol + "//" + location.host + "/" + currentShare;
+  };
+
+  getUrlToJsonDocumentation = function() {
+    return getBaseUrl() + "/restapi/v2/api-docs";
+  }
+
+  isHostedLocally = function() {
+    return getBaseUrl().includes("file://")
+  };
+</script>
+
+</body></html>
