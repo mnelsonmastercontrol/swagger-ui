@@ -33,7 +33,8 @@ export default class HttpAuth extends React.Component {
     let { onChange } = this.props
     let { value, name } = e.target
 
-    let newValue = this.state.value || {}
+    let newValue = Object.assign({}, this.state.value)
+
     if(name) {
       newValue[name] = value
     } else {
@@ -50,10 +51,10 @@ export default class HttpAuth extends React.Component {
     const Row = getComponent("Row")
     const Col = getComponent("Col")
     const AuthError = getComponent("authError")
-    const Markdown = getComponent( "Markdown" )
+    const Markdown = getComponent("Markdown", true)
     const JumpToPath = getComponent("JumpToPath", true)
 
-    const scheme = schema.get("scheme")
+    const scheme = (schema.get("scheme") || "").toLowerCase()
     let value = this.getValue()
     let errors = errSelectors.allErrors().filter( err => err.get("authId") === name)
 
@@ -73,15 +74,14 @@ export default class HttpAuth extends React.Component {
           <label>Username:</label>
           {
             username ? <code> { username } </code>
-                     : <Col><Input type="text" required="required" name="username" onChange={ this.onChange }/></Col>
+                     : <Col><Input type="text" required="required" name="username" onChange={ this.onChange } autoFocus/></Col>
           }
         </Row>
         <Row>
           <label>Password:</label>
             {
               username ? <code> ****** </code>
-                       : <Col><Input required="required"
-                                     autoComplete="new-password"
+                       : <Col><Input autoComplete="new-password"
                                      name="password"
                                      type="password"
                                      onChange={ this.onChange }/></Col>
@@ -112,7 +112,7 @@ export default class HttpAuth extends React.Component {
               <label>Value:</label>
               {
                 value ? <code> ****** </code>
-              : <Col><Input type="text" onChange={ this.onChange }/></Col>
+              : <Col><Input type="text" onChange={ this.onChange } autoFocus/></Col>
           }
         </Row>
         {
@@ -125,7 +125,7 @@ export default class HttpAuth extends React.Component {
     )
     }
   return <div>
-    <em><b>{name}</b> HTTP authentication: unsupported or missing scheme</em>
+    <em><b>{name}</b> HTTP authentication: unsupported scheme {`'${scheme}'`}</em>
   </div>
   }
 }

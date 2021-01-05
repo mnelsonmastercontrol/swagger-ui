@@ -14,6 +14,7 @@ export default class ParamBody extends PureComponent {
     consumes: PropTypes.object,
     consumesValue: PropTypes.string,
     fn: PropTypes.object.isRequired,
+    getConfigs: PropTypes.func.isRequired,
     getComponent: PropTypes.func.isRequired,
     isExecute: PropTypes.bool,
     specSelectors: PropTypes.object.isRequired,
@@ -46,11 +47,10 @@ export default class ParamBody extends PureComponent {
   }
 
   updateValues = (props) => {
-    let { specSelectors, pathMethod, param, isExecute, consumesValue="" } = props
-    let parameter = specSelectors ? specSelectors.parameterWithMeta(pathMethod, param.get("name"), param.get("in")) : fromJS({})
+    let { param, isExecute, consumesValue="" } = props
     let isXml = /xml/i.test(consumesValue)
     let isJson = /json/i.test(consumesValue)
-    let paramValue = isXml ? parameter.get("value_xml") : parameter.get("value")
+    let paramValue = isXml ? param.get("value_xml") : param.get("value")
 
     if ( paramValue !== undefined ) {
       let val = !paramValue && isJson ? "{}" : paramValue
@@ -79,13 +79,12 @@ export default class ParamBody extends PureComponent {
     this._onChange(value, isXml)
   }
 
-  _onChange = (val, isXml) => { (this.props.onChange || NOOP)(this.props.param, val, isXml) }
+  _onChange = (val, isXml) => { (this.props.onChange || NOOP)(val, isXml) }
 
   handleOnChange = e => {
     const {consumesValue} = this.props
-    const isJson = /json/i.test(consumesValue)
     const isXml = /xml/i.test(consumesValue)
-    const inputValue = isJson ? e.target.value.trim() : e.target.value
+    const inputValue = e.target.value
     this.onChange(inputValue, {isXml})
   }
 
@@ -98,7 +97,7 @@ export default class ParamBody extends PureComponent {
       isExecute,
       specSelectors,
       pathMethod,
-
+      getConfigs,
       getComponent,
     } = this.props
 
@@ -107,7 +106,7 @@ export default class ParamBody extends PureComponent {
     const HighlightCode = getComponent("highlightCode")
     const ContentType = getComponent("contentType")
     // for domains where specSelectors not passed
-    let parameter = specSelectors ? specSelectors.parameterWithMeta(pathMethod, param.get("name"), param.get("in")) : param
+    let parameter = specSelectors ? specSelectors.parameterWithMetaByIdentity(pathMethod, param) : param
     let errors = parameter.get("errors", List())
     let consumesValue = specSelectors.contentTypeValues(pathMethod).get("requestContentType")
     let consumes = this.props.consumes && this.props.consumes.size ? this.props.consumes : ParamBody.defaultProp.consumes
@@ -115,11 +114,12 @@ export default class ParamBody extends PureComponent {
     let { value, isEditBox } = this.state
 
     return (
-      <div className="body-param">
+      <div className="body-param" data-param-name={param.get("name")} data-param-in={param.get("in")}>
         {
           isEditBox && isExecute
             ? <TextArea className={ "body-param__text" + ( errors.count() ? " invalid" : "")} value={value} onChange={ this.handleOnChange }/>
             : (value && <HighlightCode className="body-param__example"
+                               getConfigs={ getConfigs }
                                value={ value }/>)
         }
         <div className="body-param-options">

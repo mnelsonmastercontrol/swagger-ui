@@ -5,16 +5,19 @@ import PropTypes from "prop-types"
 
 export default class Model extends ImmutablePureComponent {
   static propTypes = {
-    schema: ImPropTypes.orderedMap.isRequired,
+    schema: ImPropTypes.map.isRequired,
     getComponent: PropTypes.func.isRequired,
     getConfigs: PropTypes.func.isRequired,
     specSelectors: PropTypes.object.isRequired,
     name: PropTypes.string,
+    displayName: PropTypes.string,
     isRef: PropTypes.bool,
     required: PropTypes.bool,
     expandDepth: PropTypes.number,
     depth: PropTypes.number,
     specPath: ImPropTypes.list.isRequired,
+    includeReadOnly: PropTypes.bool,
+    includeWriteOnly: PropTypes.bool,
   }
 
   getModelName =( ref )=> {
@@ -22,7 +25,7 @@ export default class Model extends ImmutablePureComponent {
       return ref.replace(/^.*#\/definitions\//, "")
     }
     if ( ref.indexOf("#/components/schemas/") !== -1 ) {
-      return ref.replace("#/components/schemas/", "")
+      return ref.replace(/^.*#\/components\/schemas\//, "")
     }
   }
 
@@ -33,7 +36,8 @@ export default class Model extends ImmutablePureComponent {
   }
 
   render () {
-    let { getComponent, getConfigs, specSelectors, schema, required, name, isRef, specPath } = this.props
+    let { getComponent, getConfigs, specSelectors, schema, required, name, isRef, specPath, displayName,
+      includeReadOnly, includeWriteOnly} = this.props
     const ObjectModel = getComponent("ObjectModel")
     const ArrayModel = getComponent("ArrayModel")
     const PrimitiveModel = getComponent("PrimitiveModel")
@@ -51,12 +55,8 @@ export default class Model extends ImmutablePureComponent {
 
     if(!schema) {
       return <span className="model model-title">
-              <span className="model-title__text">{ name }</span>
-              <img src={require("core/../img/rolling-load.svg")} height={"20px"} width={"20px"} style={{
-                  marginLeft: "1em",
-                  position: "relative",
-                  bottom: "0px"
-                }} />
+              <span className="model-title__text">{ displayName || name }</span>
+              <img src={require("core/../img/rolling-load.svg")} height={"20px"} width={"20px"} />
             </span>
     }
 
@@ -73,7 +73,9 @@ export default class Model extends ImmutablePureComponent {
           schema={ schema }
           name={ name }
           deprecated={deprecated}
-          isRef={ isRef } />
+          isRef={ isRef }
+          includeReadOnly = {includeReadOnly}
+          includeWriteOnly = {includeWriteOnly}/>
       case "array":
         return <ArrayModel
           className="array" { ...this.props }
@@ -81,7 +83,9 @@ export default class Model extends ImmutablePureComponent {
           schema={ schema }
           name={ name }
           deprecated={deprecated}
-          required={ required } />
+          required={ required }
+          includeReadOnly = {includeReadOnly}
+          includeWriteOnly = {includeWriteOnly}/>
       case "string":
       case "number":
       case "integer":

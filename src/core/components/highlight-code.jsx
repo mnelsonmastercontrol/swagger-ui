@@ -1,29 +1,76 @@
 import React, { Component } from "react"
 import PropTypes from "prop-types"
-import { highlight } from "core/utils"
+import {SyntaxHighlighter, getStyle} from "core/syntax-highlighting"
+import get from "lodash/get"
+import saveAs from "js-file-download"
+import { CopyToClipboard } from "react-copy-to-clipboard"
 
 export default class HighlightCode extends Component {
   static propTypes = {
     value: PropTypes.string.isRequired,
-    className: PropTypes.string
+    getConfigs: PropTypes.func.isRequired,
+    className: PropTypes.string,
+    downloadable: PropTypes.bool,
+    fileName: PropTypes.string,
+    canCopy: PropTypes.bool
   }
 
-  componentDidMount() {
-    highlight(this.el)
+  downloadText = () => {
+    saveAs(this.props.value, this.props.fileName || "response.txt")
   }
 
-  componentDidUpdate() {
-    highlight(this.el)
-  }
+  preventYScrollingBeyondElement = (e) => {
+    const target = e.target
 
-  initializeComponent = (c) => {
-    this.el = c
+    var deltaY = e.nativeEvent.deltaY
+    var contentHeight = target.scrollHeight
+    var visibleHeight = target.offsetHeight
+    var scrollTop = target.scrollTop
+
+    const scrollOffset = visibleHeight + scrollTop
+
+    const isElementScrollable = contentHeight > visibleHeight
+    const isScrollingPastTop = scrollTop === 0 && deltaY < 0
+    const isScrollingPastBottom = scrollOffset >= contentHeight && deltaY > 0
+
+    if (isElementScrollable && (isScrollingPastTop || isScrollingPastBottom)) {
+      e.preventDefault()
+    }
   }
 
   render () {
-    let { value, className } = this.props
+    let { value, className, downloadable, getConfigs, canCopy } = this.props
+
+    const config = getConfigs ? getConfigs() : {syntaxHighlight: {activated: true, theme: "agate"}}
+
     className = className || ""
 
-    return <pre ref={this.initializeComponent} className={className + " microlight"}>{ value }</pre>
+    const codeBlock = get(config, "syntaxHighlight.activated")
+      ? <SyntaxHighlighter
+          className={className + " microlight"}
+          onWheel={this.preventYScrollingBeyondElement}
+          style={getStyle(get(config, "syntaxHighlight.theme"))}
+          >
+          {value}
+        </SyntaxHighlighter>
+      : <pre onWheel={this.preventYScrollingBeyondElement} className={className + " microlight"}>{value}</pre>
+
+    return (
+      <div className="highlight-code">
+        { !downloadable ? null :
+          <div className="download-contents" onClick={this.downloadText}>
+            Download
+          </div>
+        }
+
+        { !canCopy ? null :
+          <div className="copy-to-clipboard">
+            <CopyToClipboard text={value}><button/></CopyToClipboard>
+          </div>
+        }
+
+        { codeBlock }
+      </div>
+    )
   }
 }

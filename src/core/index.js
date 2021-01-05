@@ -1,20 +1,19 @@
 import deepExtend from "deep-extend"
 
-import System from "core/system"
-import win from "core/window"
-import ApisPreset from "core/presets/apis"
-
-import * as AllPlugins from "core/plugins/all"
-import { parseSearch } from "core/utils"
+import System from "./system"
+import ApisPreset from "./presets/apis"
+import AllPlugins from "./plugins/all"
+import { parseSearch } from "./utils"
+import win from "./window"
 
 if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
-  win.Perf = require("react-addons-perf")
+  win.Perf = require("react-dom/lib/ReactPerf")
 }
 
 // eslint-disable-next-line no-undef
 const { GIT_DIRTY, GIT_COMMIT, PACKAGE_VERSION, HOSTNAME, BUILD_TIME } = buildInfo
 
-module.exports = function SwaggerUI(opts) {
+export default function SwaggerUI(opts) {
 
   win.versions = win.versions || {}
   win.versions.swaggerUi = {
@@ -27,7 +26,7 @@ module.exports = function SwaggerUI(opts) {
 
   const defaults = {
     // Some general settings, that we floated to the top
-    dom_id: null,
+    dom_id: null, // eslint-disable-line camelcase
     domNode: null,
     spec: {},
     url: "",
@@ -36,7 +35,9 @@ module.exports = function SwaggerUI(opts) {
     docExpansion: "list",
     maxDisplayedTags: null,
     filter: null,
-    validatorUrl: "https://online.swagger.io/validator",
+    validatorUrl: "https://validator.swagger.io/validator",
+    oauth2RedirectUrl: `${window.location.protocol}//${window.location.host}/oauth2-redirect.html`,
+    persistAuthorization: false,
     configs: {},
     custom: {},
     displayOperationId: false,
@@ -49,6 +50,8 @@ module.exports = function SwaggerUI(opts) {
     defaultModelExpandDepth: 1,
     defaultModelsExpandDepth: 1,
     showExtensions: false,
+    showCommonExtensions: false,
+    withCredentials: undefined,
     supportedSubmitMethods: [
       "get",
       "put",
@@ -76,6 +79,11 @@ module.exports = function SwaggerUI(opts) {
     // Inline Plugin
     fn: { },
     components: { },
+
+    syntaxHighlight: {
+      activated: true,
+      theme: "agate"
+    }
   }
 
   let queryConfig = parseSearch()
@@ -130,10 +138,6 @@ module.exports = function SwaggerUI(opts) {
   var system = store.getSystem()
 
   const downloadSpec = (fetchedConfig) => {
-    if(typeof constructorConfig !== "object") {
-      return system
-    }
-
     let localConfig = system.specSelectors.getLocalConfig ? system.specSelectors.getLocalConfig() : {}
     let mergedConfig = deepExtend({}, localConfig, constructorConfig, fetchedConfig || {}, queryConfig)
 
@@ -143,13 +147,14 @@ module.exports = function SwaggerUI(opts) {
     }
 
     store.setConfigs(mergedConfig)
+    system.configsActions.loaded()
 
     if (fetchedConfig !== null) {
       if (!queryConfig.url && typeof mergedConfig.spec === "object" && Object.keys(mergedConfig.spec).length) {
         system.specActions.updateUrl("")
         system.specActions.updateLoadingStatus("success")
         system.specActions.updateSpec(JSON.stringify(mergedConfig.spec))
-      } else if (system.specActions.download && mergedConfig.url) {
+      } else if (system.specActions.download && mergedConfig.url && !mergedConfig.urls) {
         system.specActions.updateUrl(mergedConfig.url)
         system.specActions.download(mergedConfig.url)
       }
@@ -170,9 +175,16 @@ module.exports = function SwaggerUI(opts) {
     return system
   }
 
-  let configUrl = queryConfig.config || constructorConfig.configUrl
+  const configUrl = queryConfig.config || constructorConfig.configUrl
 
-  if (!configUrl || !system.specActions.getConfigByUrl || system.specActions.getConfigByUrl && !system.specActions.getConfigByUrl(configUrl, downloadSpec)) {
+  if (configUrl && system.specActions && system.specActions.getConfigByUrl) {
+    system.specActions.getConfigByUrl({
+      url: configUrl,
+      loadRemoteConfig: true,
+      requestInterceptor: constructorConfig.requestInterceptor,
+      responseInterceptor: constructorConfig.responseInterceptor,
+    }, downloadSpec)
+  } else {
     return downloadSpec()
   }
 
@@ -180,9 +192,9 @@ module.exports = function SwaggerUI(opts) {
 }
 
 // Add presets
-module.exports.presets = {
+SwaggerUI.presets = {
   apis: ApisPreset,
 }
 
 // All Plugins
-module.exports.plugins = AllPlugins
+SwaggerUI.plugins = AllPlugins
